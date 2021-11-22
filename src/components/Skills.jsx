@@ -1,39 +1,42 @@
-import { useEffect, useState } from "react";
-import axios from "axios";
+import { requestStates } from '../constants';
+import Circle from 'react-circle';
+import { useSkills } from '../customHooks/useSkills';
 
-const Skills = () => {
-  const [languageList, setLanguageList] = useState([]);
-  console.log(languageList);
-  useEffect(() => {
-    axios.get('https://api.github.com/users/naoki-yas/repos')
-      .then((response) => {
-        const languageList = response.data.map(res => res.language);
-        const countedLanguageList = generateLanguageCountObj(languageList);
-        setLanguageList(countedLanguageList);
-      });
-  }, []);
+export const Skills = () => {
+  const [sortedLanguageList, fetchRequestState, converseCountToPercentage] = useSkills();
 
-  const generateLanguageCountObj = (allLanguageList) => {
-    const notNullLanguageList = allLanguageList.filter(language => language != null);
-    const uniqueLanguageList = [...new Set(notNullLanguageList)];
-
-    return uniqueLanguageList.map(item => {
-      return {
-        language: item,
-        count: allLanguageList.filter(language => language === item).length
-      }
-    });
-  };
   return (
     <div id="skills">
       <div className="container">
         <div className="heading">
           <h2>Skills</h2>
         </div>
-        <div className="skills-container"></div>
+        <div className="skills-container">
+          {
+            fetchRequestState === requestStates.loading && (
+              <p className="description">取得中...</p>
+            )
+          }
+          {
+            fetchRequestState === requestStates.error && (
+              <p className="description">エラーが発生しました</p>
+            )
+          }
+          {
+            fetchRequestState === requestStates.success && (
+              sortedLanguageList().map((item, index) => (
+                <div className="skill-item" key={index}>
+                  <p className="description"><strong>{item.language}</strong></p>
+                  <Circle
+                    animate
+                    progress={converseCountToPercentage(item.count)}
+                  />
+                </div>
+              ))
+            )
+          }
+        </div>
       </div>
     </div>
   );
 };
-
-export default Skills

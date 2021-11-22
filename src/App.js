@@ -1,5 +1,5 @@
 import Header from './components/Header';
-import Skills from './components/Skills';
+import { Skills } from './components/Skills';
 import Contact from './components/Contact';
 import './App.css';
 
